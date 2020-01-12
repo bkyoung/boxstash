@@ -1,4 +1,4 @@
 .DS_Store
 **/*.db
-**/boxstash-server
+**/boxstash
 .idea/*

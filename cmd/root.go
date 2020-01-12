@@ -8,7 +8,7 @@ import (
 var rootCmd = &cobra.Command{
     Use:   "boxstash",
     Short: "Server and client for privately hosting vagrant boxes",
-    Long:  `Boxstash provides an API server for privately hosting custom vagrant boxes on a Vagrant Cloud compatible service, and a CLI client`,
+    Long:  `Boxstash provides an API server for privately hosting custom vagrant boxes on a Vagrant Cloud compatible service, along with a CLI client`,
     Run: func(cmd *cobra.Command, args []string) {
         runClient()
     },
