@@ -46,6 +46,10 @@ func (i *serviceInteractor) CreateUser() http.HandlerFunc {
             render.BadRequest(w, err)
             return
         }
+        i.logger.WithFields(logrus.Fields{
+            "func": "api.CreateUser",
+            "request": incoming,
+        }).Debug("creating user")
         user, err := i.boxService.CreateUser(ctx, incoming)
         if err != nil {
             i.logger.WithFields(logrus.Fields{
@@ -64,6 +68,10 @@ func (i *serviceInteractor) DeleteUser() http.HandlerFunc {
     return func(w http.ResponseWriter, r *http.Request) {
         ctx := r.Context()
         username := chi.URLParam(r, "username")
+        i.logger.WithFields(logrus.Fields{
+            "func": "api.DeleteUser",
+            "username": username,
+        }).Debug("deleting user")
         user, err := i.boxService.DeleteUser(ctx, &domain.User{
             Username: username,
         })
@@ -85,6 +93,10 @@ func (i *serviceInteractor) FindUser() http.HandlerFunc {
     return func(w http.ResponseWriter, r *http.Request) {
         ctx := r.Context()
         username := chi.URLParam(r, "username")
+        i.logger.WithFields(logrus.Fields{
+            "func": "api.FindUser",
+            "username": username,
+        }).Debug("finding user")
         user, err := i.boxService.FindUser(ctx, username)
         if err != nil {
             i.logger.WithFields(logrus.Fields{
@@ -117,6 +129,10 @@ func (i *serviceInteractor) UpdateUser() http.HandlerFunc {
         if incoming.Username != username && username != "" {
             incoming.Username = username
         }
+        i.logger.WithFields(logrus.Fields{
+            "func": "api.UpdateUser",
+            "username": username,
+        }).Debug("updating user")
         user, err := i.boxService.UpdateUser(ctx, incoming)
         if err != nil {
             i.logger.WithFields(logrus.Fields{

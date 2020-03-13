@@ -19,6 +19,5 @@ func Execute() error {
 }
 
 func runClient() {
-    fmt.Println("See `boxstash -h` for more info.  " +
-        "This utility will be a full client of the server api.")
+    fmt.Println("See `boxstash -h` for more info.  This utility will be a full client of the server api.")
 }

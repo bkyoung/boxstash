@@ -2,12 +2,13 @@ package repository
 
 import (
 	"context"
+	"github.com/jinzhu/gorm"
 
 	"boxstash/internal/boxstash/domain"
-	"boxstash/internal/boxstash/repository/shared/db"
-
 	"github.com/sirupsen/logrus"
 )
+
+// TODO Correct primary key and uniqueness constraints now that we've switched to gorm
 
 // BoxRepository defines operations for working with boxes, et al in a database
 type BoxRepository interface {
@@ -40,12 +41,12 @@ type BoxRepository interface {
 }
 
 type boxRepository struct {
-	db     *db.DB
+	db     *gorm.DB
 	logger *logrus.Logger
 }
 
-// NewBoxRepository returns a new domain.BoxRepository, a database interactor
-// for box, version, and provider activities
-func NewBoxRepository(db *db.DB, logger *logrus.Logger) BoxRepository {
+// NewBoxRepository returns a new domain.BoxRepository (i.e. a database interactor
+// for box, version, and provider activities)
+func NewBoxRepository(db *gorm.DB, logger *logrus.Logger) BoxRepository {
 	return &boxRepository{db, logger,}
 }

@@ -62,6 +62,10 @@ func (s *boxService) DeleteBox(ctx context.Context, box *domain.Box) (*domain.Bo
 
 // ListBoxes returns a list of boxes owned by a user/org
 func (s *boxService) ListBoxes(ctx context.Context, username string) ([]*domain.Box, error) {
+	s.logger.WithFields(logrus.Fields{
+		"func": "service.ListBoxes",
+		"username": username,
+	}).Debug("listing boxes for user")
 	boxes, err := s.Repo.ListBoxes(ctx, username)
 	if err != nil {
 		s.logger.WithFields(logrus.Fields{
@@ -121,6 +125,19 @@ func (s *boxService) UpdateBox(ctx context.Context, box *domain.Box) (*domain.Bo
 			}).Error("ERROR determining box.ID for box, missing or invalid box.Username or box." +
 				"Name")
 			return nil, ErrInvalidData
+		}
+	}
+	if box.UserID == 0 {
+		b, err := s.Repo.FindBoxByID(ctx, box.ID)
+		if err == nil {
+			box.UserID = b.UserID
+		} else {
+			s.logger.WithFields(logrus.Fields{
+				"func": "service.UpdateBox",
+				"box": box,
+				"err": err,
+			}).Error("ERROR determining box.UserID for box")
+			return nil, err
 		}
 	}
 	b, err := s.Repo.UpdateBox(ctx, box)

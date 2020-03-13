@@ -48,6 +48,12 @@ func (i *serviceInteractor) CreateVersion() http.HandlerFunc {
 			render.BadRequest(w, err)
 			return
 		}
+		i.logger.WithFields(logrus.Fields{
+			"func": "api.CreateVersion",
+			"username": username,
+			"name": name,
+			"incoming": incoming,
+		}).Debug("creating version")
 		box := domain.Box{Username: username, Name: name,}
 		version, err := i.boxService.CreateVersion(ctx, &box, incoming)
 		if err != nil {
@@ -73,6 +79,11 @@ func (i *serviceInteractor) DeleteVersion() http.HandlerFunc {
 		name := chi.URLParam(r, "name")
 		version := chi.URLParam(r, "version")
 		box := domain.Box{Username: username, Name: name,}
+		i.logger.WithFields(logrus.Fields{
+			"func": "api.DeleteVersion",
+			"username": username,
+			"name": name,
+		}).Debug("deleting version")
 		v, err := i.boxService.DeleteVersion(ctx, &box, &domain.Version{
 			Version: version,
 			BoxID: box.ID,
@@ -99,6 +110,11 @@ func (i *serviceInteractor) ListVersions() http.HandlerFunc {
 		username := chi.URLParam(r, "username")
 		name := chi.URLParam(r, "name")
 		box := domain.Box{Username: username, Name: name,}
+		i.logger.WithFields(logrus.Fields{
+			"func": "api.ListVersions",
+			"username": username,
+			"name": name,
+		}).Debug("listing versions")
 		versions, err := i.boxService.ListVersions(ctx, &box)
 		if err != nil {
 			i.logger.WithFields(logrus.Fields{
@@ -124,6 +140,12 @@ func (i *serviceInteractor) FindVersion() http.HandlerFunc {
 		version := chi.URLParam(r, "version")
 		box := domain.Box{Username: username, Name: name,}
 		v := domain.Version{Version: version,}
+		i.logger.WithFields(logrus.Fields{
+			"func": "api.FindVersion",
+			"username": username,
+			"name": name,
+			"version": version,
+		}).Debug("finding version")
 		found, err := i.boxService.FindVersion(ctx, &box, &v)
 		if err != nil {
 			i.logger.WithFields(logrus.Fields{
@@ -161,6 +183,12 @@ func (i *serviceInteractor) UpdateVersion() http.HandlerFunc {
 			return
 		}
 		incoming.Version = version
+		i.logger.WithFields(logrus.Fields{
+			"func": "api.UpdateVersion",
+			"username": username,
+			"name": name,
+			"version": version,
+		}).Debug("updating version")
 		v, err := i.boxService.UpdateVersion(ctx, &box, incoming)
 		if err != nil {
 			i.logger.WithFields(logrus.Fields{
@@ -169,7 +197,7 @@ func (i *serviceInteractor) UpdateVersion() http.HandlerFunc {
 				"username": username,
 				"name": name,
 				"version": version,
-			}).Error("ERROR updatting version")
+			}).Error("ERROR updating version")
 			render.InternalError(w, err)
 			return
 		}
@@ -190,6 +218,12 @@ func (i *serviceInteractor) ReleaseVersion() http.HandlerFunc {
 			Version: version,
 			Status: "released",
 		}
+		i.logger.WithFields(logrus.Fields{
+			"func": "api.ReleaseVersion",
+			"username": username,
+			"name": name,
+			"version": version,
+		}).Debug("releasing version")
 		v, err := i.boxService.UpdateVersion(ctx, &box, &incoming)
 		if err != nil {
 			i.logger.WithFields(logrus.Fields{
@@ -219,6 +253,12 @@ func (i *serviceInteractor) RevokeVersion() http.HandlerFunc {
 			Version: version,
 			Status: "revoked",
 		}
+		i.logger.WithFields(logrus.Fields{
+			"func": "api.RevokeVersion",
+			"username": username,
+			"name": name,
+			"version": version,
+		}).Debug("revoking version")
 		v, err := i.boxService.UpdateVersion(ctx, &box, &incoming)
 		if err != nil {
 			i.logger.WithFields(logrus.Fields{

@@ -1,8 +1,8 @@
 package cmd
 
 import (
+    "boxstash/internal/boxstash/domain"
     "boxstash/internal/boxstash/repository"
-    "boxstash/internal/boxstash/repository/shared/db"
     "boxstash/internal/boxstash/service"
     "boxstash/internal/handler/api"
     "bufio"
@@ -11,6 +11,10 @@ import (
     "github.com/sirupsen/logrus"
     "github.com/spf13/cobra"
     "github.com/spf13/viper"
+    "github.com/jinzhu/gorm"
+    _ "github.com/jinzhu/gorm/dialects/mysql"
+    _ "github.com/jinzhu/gorm/dialects/postgres"
+    _ "github.com/jinzhu/gorm/dialects/sqlite"
     "os"
     "strings"
 )
@@ -114,7 +118,7 @@ func loadLogger(c *Config) *logrus.Logger {
             f, errOpen := os.OpenFile(c.LogFile, os.O_RDWR|os.O_APPEND, 0660)
             if errOpen == nil {
                 logger.Out = bufio.NewWriter(f)
-                logger.Debugf("logger writing to ", c.LogFile)
+                logger.Debug("logger writing to ", c.LogFile)
             } else {
                 logrus.StandardLogger().Errorf("Could not open logfile %s: %s", c.LogFile, errOpen)
                 logger.Out = os.Stdout
@@ -143,6 +147,14 @@ func loadLogger(c *Config) *logrus.Logger {
     return logger
 }
 
+func autoMigrate(db *gorm.DB) error {
+    db.AutoMigrate(&domain.User{})
+    db.AutoMigrate(&domain.Box{}).AddForeignKey("user_id", "users(id)", "RESTRICT", "RESTRICT")
+    db.AutoMigrate(&domain.Version{}).AddForeignKey("box_id", "boxes(id)", "RESTRICT", "RESTRICT")
+    db.AutoMigrate(&domain.Provider{}).AddForeignKey("version_id", "versions(id)", "RESTRICT", "RESTRICT")
+    return nil
+}
+
 func runServer() {
     cfg, err := loadConfig()
     if err != nil {
@@ -150,16 +162,17 @@ func runServer() {
         os.Exit(1)
     }
     logger := loadLogger(cfg)
-    db, err := db.Connect(cfg.DatabaseDriver, cfg.DatabaseURI)
+    db, err := gorm.Open(cfg.DatabaseDriver, cfg.DatabaseURI)
     if err != nil {
         logger.WithField("func", "main").Panic("Error initializing database")
     }
+    defer db.Close()
     logger.WithFields(logrus.Fields{
         "func":   "main",
         "driver": cfg.DatabaseDriver,
         "datasource": cfg.DatabaseURI,
     }).Debug("Connected to database")
-
+    autoMigrate(db)
     BoxRepository := repository.NewBoxRepository(db, logger)
     BoxService := service.NewBoxService(BoxRepository, logger)
     BoxInteractor := api.NewInteractor(BoxService, logger)

@@ -29,6 +29,10 @@ func (s *boxService) DeleteUser(ctx context.Context, user *domain.User) (*domain
 }
 
 func (s *boxService) FindUser(ctx context.Context, username string) (*domain.User, error) {
+    s.logger.WithFields(logrus.Fields{
+        "func": "service.FindUser",
+        "username": username,
+    }).Debug("finding user")
     user, err := s.Repo.FindUserByUsername(ctx, username)
     if err != nil {
         s.logger.WithFields(logrus.Fields{
@@ -37,7 +41,10 @@ func (s *boxService) FindUser(ctx context.Context, username string) (*domain.Use
         }).Error("ERROR finding user")
         return nil, err
     }
-
+    s.logger.WithFields(logrus.Fields{
+        "func": "service.FindUser",
+        "username": username,
+    }).Debug("finding boxes for user")
     allBoxes, err := s.ListBoxes(ctx, username)
     user.Boxes = allBoxes
     if err == nil {
