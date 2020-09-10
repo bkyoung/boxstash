@@ -1,0 +1,14 @@
+version: '3'
+services:
+  waiter:
+    image: dadarek/wait-for-dependencies
+    depends_on:
+      - database
+    command: database:5432
+  dbseed:
+    image: postgres:latest
+    volumes:
+      - .:/seed
+    command: /bin/sh -c "PGPASSWORD=$POSTGRES_PASSWORD psql -h database -U $POSTGRES_USER -d $POSTGRES_DB < /seed/seed.sql"
+    depends_on:
+      - waiter

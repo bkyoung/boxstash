@@ -2,3 +2,4 @@
 **/*.db
 **/boxstash-server
 .idea/*
+vendor/*

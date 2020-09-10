@@ -1,0 +1,23 @@
+version: '3'
+services:
+  api:
+    build:
+      context: .
+    depends_on:
+      - database
+    image: boxstash
+    env_file:
+      - api.env
+    ports:
+      - 8080:8080/tcp
+      - 8081:8081/tcp
+  database:
+    image: "postgres"
+    env_file:
+      - database.env
+    volumes:
+      - database-data:/var/lib/postgresql/data/
+    ports:
+      - 5432:5432/tcp
+volumes:
+  database-data:
